@@ -1,0 +1,5 @@
+require'base.main'
+require'base.theme'
+require'base.tabs'
+require'base.search'
+require'base.cmd'
