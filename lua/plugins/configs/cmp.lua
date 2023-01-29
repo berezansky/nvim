@@ -14,7 +14,7 @@ cmp.setup{
 
 		-- Вызов меню автодополнения
 		['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-		['<C-y>'] = cmp.mapping.confirm({ select = true }), -- А вот на <C-y> вполне ок
+		['<CR>'] = cmp.mapping.confirm({ select = true }), -- А вот на <C-y> вполне ок
 
 		-- Используем <C-e> для того чтобы прервать автодополнение
 		['<C-e>'] = cmp.mapping({
@@ -32,6 +32,7 @@ cmp.setup{
 		{ name = 'buffer' },                  -- Буфферы 🐃
 		{ name = 'path' },                    -- Пути 🪤
 		{ name = "emoji" },                   -- Эмодзи 😳
+    { name = "buffers" }
 	}, {
 	}),
 	formatting = {

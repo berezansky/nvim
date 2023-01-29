@@ -1,7 +1,7 @@
-local map = vim.api.nvim_set_keymap 
+local map = vim.api.nvim_set_keymap
 local default_opts = {noremap = true}
 
-function nm(key, command) 
+function nm(key, command)
 	map('n', key, command, default_opts)
 end
 

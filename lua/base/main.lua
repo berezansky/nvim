@@ -13,7 +13,6 @@ set('n', '<Space>', '', {})
 g.mapleader = ' '
 
 opt.clipboard = 'unnamedplus'        -- Копировать в буфер обмена
-opt.colorcolumn = '120'              -- Разделитель на 120 символов
 opt.cursorline = true                -- Подсветка строки с курсором
 opt.spelllang= { 'en_us', 'ru' }     -- Словари рус eng
 opt.number = true                    -- Включаем нумерацию строк

@@ -8,10 +8,6 @@ cmd([[
 filetype indent plugin on
 syntax enable
 ]])
--- Отключение автокомментирования новых строк
-cmd [[au BufEnter * set fo-=c fo-=r fo-=o]]
--- Удалить маркер длины строки для указанных типов файлов 
-cmd [[autocmd FileType text,markdown,html,xhtml,javascript setlocal cc=0]]
 -- Установить 2 пробела для указанных типов файлов
 cmd [[
 autocmd FileType xml,html,xhtml,css,scss,javascript,lua,yaml,htmljinja setlocal shiftwidth=2 tabstop=2

@@ -19,7 +19,7 @@ fidget.setup{
   window = {
     relative = "win",
     blend = 100,
-    zindex = 999,
+    zindex = 1,
     border = "none",
   },
 }
