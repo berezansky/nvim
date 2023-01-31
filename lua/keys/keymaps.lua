@@ -9,5 +9,6 @@ nm('<C-j>', '<C-w><Down>')
 nm('<C-l>', '<C-w><Right>')
 nm('<C-h>', '<C-w><Left>')
 
--- Formatter
-nm('<leader>l', '<cmd>Format<CR>')
+-- Clear Search
+nm('//', '<cmd>:noh<cr>')
+

@@ -1,3 +1,3 @@
-require'plugins.packer_install';
+require'plugins.install_list';
 require'base.settings'
 require'keys.keymaps';

@@ -1,3 +1,4 @@
+require'base.disable_builtins'
 require'base.main'
 require'base.theme'
 require'base.tabs'
