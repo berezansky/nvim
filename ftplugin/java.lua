@@ -9,7 +9,7 @@ end
 
 
 local HOME = os.getenv "HOME"
-local WORKSPACE_PATH = HOME .. "/Projects/Home/Java"
+local WORKSPACE_PATH = HOME .. os.getenv "JAVA_PROJECT_HOME"
 
 local JDTLS_LOCATION = HOME .. "/.local/share/nvim/mason/packages/jdtls/"
 

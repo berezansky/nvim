@@ -13,8 +13,8 @@ cmp.setup {
     mapping = {
 
         -- Вызов меню автодополнения
-        ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-        ['<C-i>'] = cmp.mapping.confirm({ select = true }), -- А вот на <C-y> вполне ок
+        ['<C-c>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+        ['<C-i>'] = cmp.mapping.confirm({ select = true }),
 
         -- Используем <C-e> для того чтобы прервать автодополнение
         ['<C-e>'] = cmp.mapping({

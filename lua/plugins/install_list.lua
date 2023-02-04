@@ -171,4 +171,18 @@ return require('packer').startup(function()
         ft = { 'java' },
     }
 
+    -- StartScreen
+    use{
+        'mhinz/vim-startify',
+        config = function ()
+            require'plugins.configs.startify'
+        end
+    }
+
+    -- usefull hotkeys
+    use'tpope/vim-unimpaired'
+
+    -- Оборачивание текста в теги или скобки
+    use'tpope/vim-surround'
+
 end)
