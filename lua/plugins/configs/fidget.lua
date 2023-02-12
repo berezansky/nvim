@@ -17,9 +17,14 @@ fidget.setup{
     task_decay = 1000,
   },
   window = {
-    relative = "win",
+    relative = "editor",
     blend = 100,
-    zindex = 1,
+    zindex = nil,
     border = "none",
   },
+  sources = {
+      jdtls = {
+          ignore = true,
+      }
+  }
 }

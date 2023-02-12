@@ -1,15 +1,13 @@
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
-local jdtls_ok, jdtls = pcall(require, "jdtls")
-if not jdtls_ok then
-  vim.notify "JDTLS not found, install with `:LspInstall jdtls`"
-  return
+local status, jdtls = pcall(require, "jdtls")
+if not status then
+	return
 end
 
-
 local HOME = os.getenv "HOME"
-local WORKSPACE_PATH = HOME .. os.getenv "JAVA_PROJECT_HOME"
+local WORKSPACE_PATH = HOME .. "/.cache/jdtls-workspace/"
 
 local JDTLS_LOCATION = HOME .. "/.local/share/nvim/mason/packages/jdtls/"
 
@@ -27,6 +25,17 @@ end
 local extendedClientCapabilities = jdtls.extendedClientCapabilities
 extendedClientCapabilities.resolveAdditionalTextEditsSupport = true
 
+local bundles = {}
+local mason_path = HOME .. "/.local/share/nvim/mason/"
+vim.list_extend(bundles, vim.split(vim.fn.glob(mason_path .. "packages/java-test/extension/server/*.jar"), "\n"))
+vim.list_extend(
+    bundles,
+    vim.split(
+        vim.fn.glob(mason_path .. "packages/java-debug-adapter/extension/server/com.microsoft.java.debug.plugin-*.jar"),
+        "\n"
+    )
+)
+
 local config = {
   cmd = {
     "java",
@@ -36,29 +45,40 @@ local config = {
     "-Dlog.protocol=true",
     "-Dlog.level=ALL",
     "-Xms1g",
-    "--add-modules=ALL-SYSTEM",
-    "--add-opens",
-    "java.base/java.util=ALL-UNNAMED",
-    "--add-opens",
-    "java.base/java.lang=ALL-UNNAMED",
+	"-javaagent:" .. HOME .. "/.local/share/nvim/mason/packages/jdtls/lombok.jar",
     "-jar",
     vim.fn.glob(JDTLS_LOCATION .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
     "-configuration",
     JDTLS_LOCATION .. "/config_" .. SYSTEM,
     "-data",
     workspace_dir,
+    "--add-modules=ALL-SYSTEM",
+    "--add-opens",
+    "java.base/java.util=ALL-UNNAMED",
+    "--add-opens",
+    "java.base/java.lang=ALL-UNNAMED",
   },
 
   root_dir = root_dir,
 
   settings = {
     java = {
-      home = HOME .. '/opt/homebrew/Cellar/openjdk/19.0.1/libexec/openjdk.jdk/Contents/Home',
+      home = '/opt/homebrew/Cellar/openjdk/19.0.1/libexec/openjdk.jdk/Contents/Home',
       eclipse = {
         downloadSources = true,
       },
       configuration = {
-        updateBuildConfiguration = "interactive",
+        runtimes = {
+          {
+              name = "JavaSE-19",
+              path = '/opt/homebrew/Cellar/openjdk/19.0.1/libexec/openjdk.jdk/Contents/Home',
+              default = true,
+          },
+          {
+              name = "JavaSE-17",
+              path = '/opt/homebrew/Cellar/openjdk@17/17.0.6/libexec/openjdk.jdk/Contents/Home',
+          },
+        },
       },
       maven = {
         downloadSources = true,
@@ -73,14 +93,12 @@ local config = {
         includeDecompiledSources = true,
       },
       format = {
-        enabled = true,
-        settings = {
-          url = vim.fn.stdpath "config" .. "/lang-servers/intellij-java-google-style.xml",
-          profile = "GoogleStyle",
-        },
-      },
+          enabled = true,
+          url = HOME.. '/.local/share/nvim/mason/packages/google-java-format/google-java-format',
+          profile="GoogleStyle"
+      }
     },
-
+    autobuild = { ebabled = true },
     signatureHelp = { enabled = true },
     import = { enabled = true },
     rename = { enabled = true },
