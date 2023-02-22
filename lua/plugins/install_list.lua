@@ -127,11 +127,11 @@ return require('packer').startup(function()
 
     -- Git
     use {
-    'lewis6991/gitsigns.nvim',
-    config = function()
-      require'plugins.configs.gitsigns'
-    end
-  }
+        'lewis6991/gitsigns.nvim',
+        config = function()
+            require 'plugins.configs.gitsigns'
+        end
+    }
 
     use {
         'tpope/vim-fugitive',
@@ -172,17 +172,35 @@ return require('packer').startup(function()
     }
 
     -- StartScreen
-    use{
+    use {
         'mhinz/vim-startify',
-        config = function ()
-            require'plugins.configs.startify'
+        config = function()
+            require 'plugins.configs.startify'
         end
     }
 
     -- usefull hotkeys
-    use'tpope/vim-unimpaired'
+    use 'tpope/vim-unimpaired'
 
     -- Оборачивание текста в теги или скобки
-    use'tpope/vim-surround'
+    use 'tpope/vim-surround'
 
+    -- Вывод ошибок
+    use {
+        "folke/trouble.nvim",
+        requires = "nvim-tree/nvim-web-devicons",
+        config = function()
+            require 'plugins.configs.trouble'
+        end
+    }
+
+    -- Database
+    use 'nanotee/sqls.nvim'
+    use {
+        'tpope/vim-dadbod',
+        config = function()
+            require 'plugins.configs.dadbod'
+        end
+    }
+    use { 'kristijanhusak/vim-dadbod-ui' }
 end)
