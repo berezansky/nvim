@@ -5,6 +5,7 @@ return require('packer').startup(function()
 
     -- Color scheme
     use 'folke/tokyonight.nvim'
+    use 'shaunsingh/solarized.nvim'
 
     -- Icons
     use 'nvim-tree/nvim-web-devicons'

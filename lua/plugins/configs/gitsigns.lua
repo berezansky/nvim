@@ -2,10 +2,10 @@ local gitsigns = require 'gitsigns'
 
 gitsigns.setup {
     signs = {
-        add          = { text = '│' },
-        change       = { text = '│' },
-        delete       = { text = '_' },
-        topdelete    = { text = '‾' },
+        add = { text = '+' },
+        change = { text = '~' },
+        delete = { text = '-' },
+        topdelete = { text = '‾' },
         changedelete = { text = '~' },
         untracked    = { text = '┆' },
     },
@@ -37,8 +37,5 @@ gitsigns.setup {
         relative = 'cursor',
         row = 0,
         col = 1
-    },
-    yadm = {
-        enable = false
     },
 }
