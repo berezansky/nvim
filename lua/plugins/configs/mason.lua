@@ -45,3 +45,22 @@ lspconfig.gopls.setup {
     end,
 
 }
+
+lspconfig.ts_ls.setup {}
+
+vim.api.nvim_set_keymap('n', '<leader>ai', '<cmd>lua AddAllMissingImports()<CR>', { noremap = true, silent = true })
+
+function AddAllMissingImports()
+  local params = vim.lsp.util.make_range_params()
+  params.context = { only = { "source.addMissingImports.ts" } }
+  local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 5000)
+  for _, res in pairs(result or {}) do
+    for _, r in pairs(res.result or {}) do
+      if r.edit then
+        vim.lsp.util.apply_workspace_edit(r.edit, "utf-8")
+      else
+        vim.lsp.buf.execute_command(r.command)
+      end
+    end
+  end
+end
