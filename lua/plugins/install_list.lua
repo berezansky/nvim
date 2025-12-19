@@ -27,13 +27,25 @@ return require('packer').startup(function()
         config = function() require 'plugins.configs.lspconfig' end
     }
 
-    use 'williamboman/mason.nvim'
+    use {
+        'williamboman/mason.nvim',
+        config = function()
+            require("mason").setup({})
+        end
+    }
 
     use {
         'williamboman/mason-lspconfig.nvim',
-        config = function()
-            require 'plugins.configs.mason'
-        end
+        after = { "mason.nvim", "nvim-lspconfig" },
+        config = function() require 'plugins.configs.mason-lspconfig' end
+    }
+
+    use {
+    'nvimtools/none-ls.nvim',
+    requires = { 'nvim-lua/plenary.nvim' },
+    config = function()
+        require 'plugins.configs.none-ls'
+    end
     }
 
     -- Прогресс LSP
