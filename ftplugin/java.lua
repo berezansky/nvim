@@ -12,10 +12,52 @@ if not status then
   return
 end
 
+-- Workaround for Neovim 0.11.3 typo in client/unregisterCapability handler
+-- (`unregisterations` instead of `unregistrations`) which can crash on jdtls.
+vim.lsp.handlers["client/registerCapability"] = function(_, params, ctx)
+  local client = vim.lsp.get_client_by_id(ctx.client_id)
+  if not client then
+    return vim.NIL
+  end
+  local regs = params and params.registrations or {}
+  if type(regs) ~= "table" then
+    regs = {}
+  end
+  client:_register(regs)
+  for bufnr in pairs(client.attached_buffers) do
+    vim.lsp._set_defaults(client, bufnr)
+  end
+  return vim.NIL
+end
+
+vim.lsp.handlers["client/unregisterCapability"] = function(_, params, ctx)
+  local client = vim.lsp.get_client_by_id(ctx.client_id)
+  if not client then
+    return vim.NIL
+  end
+  local unregs = params and (params.unregistrations or params.unregisterations) or {}
+  if type(unregs) ~= "table" then
+    unregs = {}
+  end
+  client:_unregister(unregs)
+  return vim.NIL
+end
+
 local HOME = os.getenv("HOME")
 local WORKSPACE_PATH = HOME .. "/.cache/jdtls-workspace/"
-local JDTLS_LOCATION = HOME .. "/.local/share/nvim/mason/packages/jdtls/"
-local SYSTEM = "mac"
+
+local function latest_homebrew_jdk(pattern)
+  local homes = vim.fn.glob(pattern, true, true)
+  table.sort(homes)
+  return homes[#homes]
+end
+
+local java17_home = latest_homebrew_jdk("/opt/homebrew/Cellar/openjdk@17/*/libexec/openjdk.jdk/Contents/Home")
+local any_homebrew_jdk = latest_homebrew_jdk("/opt/homebrew/Cellar/openjdk/*/libexec/openjdk.jdk/Contents/Home")
+local jdtls_java_home = latest_homebrew_jdk("/opt/homebrew/Cellar/openjdk@21/*/libexec/openjdk.jdk/Contents/Home")
+  or any_homebrew_jdk
+  or os.getenv("JAVA_HOME")
+local jdtls_java_executable = jdtls_java_home and (jdtls_java_home .. "/bin/java") or "java"
 
 local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":p:h:t")
 local workspace_dir = WORKSPACE_PATH .. project_name
@@ -48,23 +90,10 @@ vim.list_extend(
 
 local config = {
   cmd = {
-    "java",
-    "-Declipse.application=org.eclipse.jdt.ls.core.id1",
-    "-Dosgi.bundles.defaultStartLevel=4",
-    "-Declipse.product=org.eclipse.jdt.ls.core.product",
-    "-Dlog.protocol=true",
-    "-Dlog.level=ALL",
-    "-Xms1g",
-    "-javaagent:" .. HOME .. "/.local/share/nvim/mason/packages/jdtls/lombok.jar",
-    "-jar",
-    vim.fn.glob(JDTLS_LOCATION .. "/plugins/org.eclipse.equinox.launcher_*.jar"),
-    "-configuration",
-    JDTLS_LOCATION .. "/config_" .. SYSTEM,
+    vim.fn.expand("$HOME/.local/share/nvim/mason/packages/jdtls/bin/jdtls"),
+    "--java-executable=" .. jdtls_java_executable,
     "-data",
     workspace_dir,
-    "--add-modules=ALL-SYSTEM",
-    "--add-opens", "java.base/java.util=ALL-UNNAMED",
-    "--add-opens", "java.base/java.lang=ALL-UNNAMED",
   },
 
   root_dir = root_dir,
@@ -74,21 +103,8 @@ local config = {
 
   settings = {
     java = {
-      -- ❗ РЕКОМЕНДУЮ 17
-      home = "/opt/homebrew/Cellar/openjdk@17/17.0.6/libexec/openjdk.jdk/Contents/Home",
-
       eclipse = { downloadSources = true },
       maven = { downloadSources = true },
-
-      configuration = {
-        runtimes = {
-          {
-            name = "JavaSE-17",
-            path = "/opt/homebrew/Cellar/openjdk@17/17.0.6/libexec/openjdk.jdk/Contents/Home",
-            default = true,
-          },
-        },
-      },
 
       implementationsCodeLens = { enabled = true },
       referencesCodeLens = { enabled = true },
@@ -111,6 +127,19 @@ local config = {
     extendedClientCapabilities = extendedClientCapabilities,
   },
 }
+
+if java17_home then
+  config.settings.java.home = java17_home
+  config.settings.java.configuration = {
+    runtimes = {
+      {
+        name = "JavaSE-17",
+        path = java17_home,
+        default = true,
+      },
+    },
+  }
+end
 
 jdtls.start_or_attach(config)
 require("jdtls.setup").add_commands()

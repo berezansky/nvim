@@ -67,6 +67,7 @@ return require('packer').startup(function()
     -- TreeSitter
     use {
         'nvim-treesitter/nvim-treesitter',
+        run = ':TSUpdate',
         config = function()
             require 'plugins.configs.treesitter'
         end
@@ -177,6 +178,14 @@ return require('packer').startup(function()
     }
 
     use 'nvim-telescope/telescope-ui-select.nvim'
+
+    -- Codex
+    use {
+        'rhart92/codex.nvim',
+        config = function()
+            require 'plugins.configs.codex'
+        end
+    }
 
     -- Java
     use {
