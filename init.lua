@@ -4,6 +4,9 @@ if vim.lsp and vim.lsp.get_clients then
   end
 end
 
+vim.g.mapleader = ' '
+vim.g.maplocalleader = ' '
+
 if vim.islist then
   vim.tbl_islist = vim.islist
 end
@@ -17,6 +20,8 @@ if not vim.env.JAVA_HOME or vim.env.JAVA_HOME == "" then
     vim.env.PATH = latest_java21 .. "/bin:" .. vim.env.PATH
   end
 end
+
+vim.opt.packpath:remove(vim.fn.stdpath('data') .. '/site')
 
 require'plugins.install_list';
 require'base.settings'

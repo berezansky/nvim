@@ -1,49 +1,182 @@
-local trouble = require'trouble'
+require('trouble').setup({
+  auto_close = false,
+  auto_open = false,
+  auto_preview = true,
+  auto_refresh = true,
+  auto_jump = false,
+  focus = false,
+  follow = true,
+  indent_guides = true,
+  max_items = 200,
+  multiline = true,
+  restore = true,
+  warn_no_results = true,
+  open_no_results = false,
 
-trouble.setup{
-    position = "bottom", -- position of the list can be: bottom, top, left, right
-    height = 10, -- height of the trouble list when position is top or bottom
-    width = 50, -- width of the list when position is left or right
-    icons = true, -- use devicons for filenames
-    mode = "workspace_diagnostics", -- "workspace_diagnostics", "document_diagnostics", "quickfix", "lsp_references", "loclist"
-    fold_open = "", -- icon used for open folds
-    fold_closed = "", -- icon used for closed folds
-    group = true, -- group results by file
-    padding = true, -- add an extra new line on top of the list
-    action_keys = { -- key mappings for actions in the trouble list
-        -- map to {} to remove a mapping, for example:
-        -- close = {},
-        close = "q", -- close the list
-        cancel = "<esc>", -- cancel the preview and get back to your last window / buffer / cursor
-        refresh = "r", -- manually refresh
-        jump = {"<cr>", "<tab>"}, -- jump to the diagnostic or open / close folds
-        open_split = { "<c-x>" }, -- open buffer in new split
-        open_vsplit = { "<c-v>" }, -- open buffer in new vsplit
-        open_tab = { "<c-t>" }, -- open buffer in new tab
-        jump_close = {"o"}, -- jump to the diagnostic and close the list
-        toggle_mode = "m", -- toggle between "workspace" and "document" diagnostics mode
-        toggle_preview = "P", -- toggle auto_preview
-        hover = "K", -- opens a small popup with the full multiline message
-        preview = "p", -- preview the diagnostic location
-        close_folds = {"zM", "zm"}, -- close all folds
-        open_folds = {"zR", "zr"}, -- open all folds
-        toggle_fold = {"zA", "za"}, -- toggle fold of current file
-        previous = "k", -- previous item
-        next = "j" -- next item
+  keys = {
+    ['?'] = 'help',
+    r = 'refresh',
+    R = 'toggle_refresh',
+    q = 'close',
+    o = 'jump_close',
+    ['<esc>'] = 'cancel',
+    ['<cr>'] = 'jump',
+    ['<c-s>'] = 'jump_split',
+    ['<c-v>'] = 'jump_vsplit',
+    p = 'preview',
+    P = 'toggle_preview',
+    zo = 'fold_open',
+    zO = 'fold_open_recursive',
+    zc = 'fold_close',
+    zC = 'fold_close_recursive',
+    za = 'fold_toggle',
+    zA = 'fold_toggle_recursive',
+    zm = 'fold_more',
+    zM = 'fold_close_all',
+    zr = 'fold_reduce',
+    zR = 'fold_open_all',
+    gb = {
+      action = function(view)
+        view:filter({ buf = 0 }, { toggle = true })
+      end,
+      desc = 'Toggle Current Buffer Filter',
     },
-    indent_lines = true, -- add an indent guide below the fold icons
-    auto_open = false, -- automatically open the list when you have diagnostics
-    auto_close = false, -- automatically close the list when you have no diagnostics
-    auto_preview = true, -- automatically preview the location of the diagnostic. <esc> to close preview and go back to last window
-    auto_fold = false, -- automatically fold a file trouble list at creation
-    auto_jump = {"lsp_definitions"}, -- for the given modes, automatically jump if there is only a single result
-    signs = {
-        -- icons / text used for a diagnostic
-        error = "",
-        warning = "",
-        hint = "",
-        information = "",
-        other = "﫠"
+    s = {
+      action = function(view)
+        local filter = view:get_filter('severity')
+        local severity = ((filter and filter.filter.severity or 0) + 1) % 5
+
+        view:filter({ severity = severity }, {
+          id = 'severity',
+          template = '{hl:Title}Filter:{hl} {severity}',
+          del = severity == 0,
+        })
+      end,
+      desc = 'Toggle Severity Filter',
     },
-    use_diagnostic_signs = false -- enabling this will use the signs defined in your lsp client
-}
+  },
+
+  modes = {
+    diagnostics = {
+      auto_open = false,
+      auto_close = false,
+      win = {
+        type = 'split',
+        position = 'bottom',
+        size = 10,
+      },
+    },
+    diagnostics_buffer = {
+      mode = 'diagnostics',
+      filter = { buf = 0 },
+      win = {
+        type = 'split',
+        position = 'bottom',
+        size = 10,
+      },
+    },
+    symbols = {
+      mode = 'lsp_document_symbols',
+      focus = false,
+      auto_preview = true,
+      multiline = false,
+      format = '{kind_icon} {symbol.name} {pos}',
+      filter = function(items)
+        local useful_kinds = {
+          Class = true,
+          Constant = true,
+          Constructor = true,
+          Enum = true,
+          EnumMember = true,
+          Function = true,
+          Interface = true,
+          Method = true,
+          Module = true,
+          Namespace = true,
+          Object = true,
+          Package = true,
+          Struct = true,
+          Trait = true,
+          TypeParameter = true,
+          Variable = true,
+        }
+
+        return vim.tbl_filter(function(item)
+          if item.ft == 'help' or item.ft == 'markdown' then
+            return true
+          end
+
+          local symbol = item.symbol or {}
+          local name = symbol.name or item.text or ''
+
+          if name:lower():find('callback', 1, true) then
+            return false
+          end
+
+          return useful_kinds[item.kind] == true
+        end, items)
+      end,
+      win = {
+        type = 'split',
+        position = 'right',
+        size = 42,
+        wo = {
+          wrap = false,
+          linebreak = false,
+          number = false,
+          relativenumber = false,
+          signcolumn = 'no',
+        },
+      },
+    },
+    lsp = {
+      focus = false,
+      win = {
+        type = 'split',
+        position = 'right',
+        size = 50,
+      },
+    },
+  },
+
+  icons = {
+    indent = {
+      top = '│ ',
+      middle = '├╴',
+      last = '└╴',
+      fold_open = ' ',
+      fold_closed = ' ',
+      ws = '  ',
+    },
+    folder_closed = ' ',
+    folder_open = ' ',
+    kinds = {
+      Array = ' ',
+      Boolean = '󰨙 ',
+      Class = ' ',
+      Constant = '󰏿 ',
+      Constructor = ' ',
+      Enum = ' ',
+      EnumMember = ' ',
+      Event = ' ',
+      Field = ' ',
+      File = ' ',
+      Function = '󰊕 ',
+      Interface = ' ',
+      Key = ' ',
+      Method = '󰊕 ',
+      Module = ' ',
+      Namespace = '󰦮 ',
+      Null = ' ',
+      Number = '󰎠 ',
+      Object = ' ',
+      Operator = ' ',
+      Package = ' ',
+      Property = ' ',
+      String = ' ',
+      Struct = '󰆼 ',
+      TypeParameter = ' ',
+      Variable = '󰀫 ',
+    },
+  },
+})

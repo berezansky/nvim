@@ -2,10 +2,15 @@ local cmp = require('cmp')
 local lspkind = require('lspkind')
 
 cmp.setup {
+    completion = {
+        autocomplete = { cmp.TriggerEvent.TextChanged },
+    },
+
     -- Клавиши, которые будут взаимодействовать в nvim-cmp
     mapping = {
 
         -- Вызов меню автодополнения
+        ['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
         ['<C-c>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
         ['<Tab>'] = cmp.mapping.confirm({ select = true }),
 
@@ -25,7 +30,6 @@ cmp.setup {
         { name = 'buffer' }, -- Буфферы 🐃
         { name = 'path' }, -- Пути 🪤
         { name = "emoji" }, -- Эмодзи 😳
-        { name = "buffers" }
     }, {
     }),
     formatting = {

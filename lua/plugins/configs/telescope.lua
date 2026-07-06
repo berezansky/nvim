@@ -39,4 +39,4 @@ telescope.setup {
     }
 }
 
-telescope.load_extension('ui-select')
+pcall(telescope.load_extension, 'ui-select')

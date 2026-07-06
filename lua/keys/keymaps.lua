@@ -16,8 +16,9 @@ nm('<C-l>', '<C-w><Right>')
 nm('<C-h>', '<C-w><Left>')
 nm('<C-h>', '<C-w><Left>')
 nm('<leader>ef', '<cmd>EslintFixAll<CR>')
-nm('<leader>cs', '<cmd>colorscheme solarized<CR>')
-nm('<leader>ct', '<cmd>colorscheme tokyonight-storm<CR>')
+nm('<leader>ca', '<cmd>lua require("base.theme").apply_system_theme()<CR>')
+nm('<leader>cs', '<cmd>lua require("base.theme").solarized_light()<CR>')
+nm('<leader>ct', '<cmd>lua require("base.theme").tokyonight_dark()<CR>')
 
 -- Clear Search
 nm('//', '<cmd>:noh<cr>')

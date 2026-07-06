@@ -1,228 +1,298 @@
-vim.cmd [[packadd packer.nvim]]
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 
-return require('packer').startup(function()
-    use 'wbthomason/packer.nvim'
+if not vim.loop.fs_stat(lazypath) then
+  local out = vim.fn.system({
+    'git',
+    'clone',
+    '--filter=blob:none',
+    'https://github.com/folke/lazy.nvim.git',
+    '--branch=stable',
+    lazypath,
+  })
 
-    -- Color scheme
-    use 'folke/tokyonight.nvim'
-    use 'shaunsingh/solarized.nvim'
+  if vim.v.shell_error ~= 0 then
+    error('Failed to install lazy.nvim:\n' .. out)
+  end
+end
 
-    -- Icons
-    use 'nvim-tree/nvim-web-devicons'
+vim.opt.rtp:prepend(lazypath)
 
-    -- StatusLine
-    use {
-        'nvim-lualine/lualine.nvim',
-        requires = { 'nvim-tree/nvim-web-devicons', opt = true },
-        config = function()
-            require('lualine').setup({
-                options = { theme = 'tokyonight' }
-            })
-        end
-    }
+require('lazy').setup({
+  -- Color schemes
+  { 'shaunsingh/solarized.nvim', lazy = false, priority = 1000 },
+  { 'folke/tokyonight.nvim', lazy = true },
 
-    -- LSP
-    use {
-        "neovim/nvim-lspconfig",
-        config = function() require 'plugins.configs.lspconfig' end
-    }
+  -- Icons
+  { 'nvim-tree/nvim-web-devicons', lazy = true },
 
-    use {
-        'williamboman/mason.nvim',
-        config = function()
-            require("mason").setup({})
-        end
-    }
-
-    use {
-        'williamboman/mason-lspconfig.nvim',
-        after = { "mason.nvim", "nvim-lspconfig" },
-        config = function() require 'plugins.configs.mason-lspconfig' end
-    }
-
-    use {
-    'nvimtools/none-ls.nvim',
-    requires = { 'nvim-lua/plenary.nvim' },
+  -- StatusLine
+  {
+    'nvim-lualine/lualine.nvim',
+    event = 'VimEnter',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
     config = function()
-        require 'plugins.configs.none-ls'
-    end
-    }
+      require('lualine').setup({
+        options = { theme = 'auto' },
+      })
+    end,
+  },
 
-    -- Прогресс LSP
-    use {
-        'j-hui/fidget.nvim',
-        config = function()
-            require 'plugins.configs.fidget'
-        end
-    }
+  -- LSP
+  {
+    'neovim/nvim-lspconfig',
+    event = { 'BufReadPre', 'BufNewFile' },
+    config = function() require 'plugins.configs.lspconfig' end,
+  },
 
-    -- Auto close tag
-    use {
-        'windwp/nvim-ts-autotag',
-        config = function()
-            require 'nvim-ts-autotag'.setup {}
-        end
-    }
+  {
+    'mason-org/mason.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
+  },
 
-    -- TreeSitter
-    use {
-        'nvim-treesitter/nvim-treesitter',
-        run = ':TSUpdate',
-        config = function()
-            require 'plugins.configs.treesitter'
-        end
-    }
+  {
+    'mason-org/mason-lspconfig.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
+    dependencies = { 'mason-org/mason.nvim', 'neovim/nvim-lspconfig' },
+    config = function() require 'plugins.configs.mason-lspconfig' end,
+  },
 
+  {
+    'nvimtools/none-ls.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
+    dependencies = { 'nvim-lua/plenary.nvim' },
+    config = function()
+      require 'plugins.configs.none-ls'
+    end,
+  },
 
-    -- Colorized
-    use {
-        'norcalli/nvim-colorizer.lua',
-        config = function()
-            require 'plugins.configs.colorizer'
-        end
-    }
+  -- LSP progress
+  {
+    'j-hui/fidget.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
+    config = function()
+      require 'plugins.configs.fidget'
+    end,
+  },
 
-    -- Symbols outline
-    use {
-        'simrat39/symbols-outline.nvim',
-        config = function()
-            require 'plugins.configs.symbols-outline'
-        end,
-    }
+  -- Auto close tag
+  {
+    'windwp/nvim-ts-autotag',
+    ft = { 'html', 'htmldjango', 'javascriptreact', 'typescriptreact', 'vue', 'svelte', 'xml' },
+    config = function()
+      require('nvim-ts-autotag').setup({})
+    end,
+  },
 
-    -- Автодополнение
-    use {
-        'hrsh7th/nvim-cmp',
-        requires = {
-            'L3MON4D3/LuaSnip',
-            'saadparwaiz1/cmp_luasnip',
-            'hrsh7th/cmp-nvim-lsp',
-            'hrsh7th/cmp-path',
-            'hrsh7th/cmp-emoji',
-            'hrsh7th/cmp-nvim-lsp-signature-help',
-            'hrsh7th/cmp-nvim-lua'
-        },
-        config = function()
-            require 'plugins.configs.cmp'
-        end
-    }
+  -- TreeSitter
+  {
+    'nvim-treesitter/nvim-treesitter',
+    lazy = false,
+    build = function()
+      local languages = require('plugins.treesitter_languages')
+      local treesitter = require('nvim-treesitter')
 
-    -- Иконки для автодополнения
-    use {
-        'onsails/lspkind-nvim',
-        config = function()
-            require 'plugins.configs.lspkind'
-        end
-    }
+      treesitter.install(languages.parsers):wait(300000)
+      treesitter.update(languages.parsers):wait(300000)
+    end,
+    config = function()
+      require 'plugins.configs.treesitter'
+    end,
+  },
 
-    -- Навигация
-    use {
-        "nvim-neo-tree/neo-tree.nvim",
-        branch   = "v2.x",
-        requires = {
-            "nvim-lua/plenary.nvim",
-            "kyazdani42/nvim-web-devicons",
-            "MunifTanjim/nui.nvim",
-        },
-        config   = function()
-            require 'plugins.configs.neo-tree'
-        end
-    }
+  -- Colorized
+  {
+    'norcalli/nvim-colorizer.lua',
+    cmd = { 'ColorizerAttachToBuffer', 'ColorizerDetachFromBuffer', 'ColorizerReloadAllBuffers', 'ColorizerToggle' },
+    config = function()
+      require 'plugins.configs.colorizer'
+    end,
+  },
 
-    -- Документация
-    use {
-        "danymat/neogen",
-        requires = "nvim-treesitter/nvim-treesitter",
-        tag = "*",
-        config = function()
-            require 'plugins.configs.neogen'
-        end,
-    }
+  -- Symbols outline
+  {
+    'simrat39/symbols-outline.nvim',
+    cmd = { 'SymbolsOutline', 'SymbolsOutlineOpen', 'SymbolsOutlineClose' },
+    config = function()
+      require 'plugins.configs.symbols-outline'
+    end,
+  },
 
-    -- Git
-    use {
-        'lewis6991/gitsigns.nvim',
-        config = function()
-            require 'plugins.configs.gitsigns'
-        end
-    }
+  -- Completion
+  {
+    'hrsh7th/nvim-cmp',
+    lazy = false,
+    dependencies = {
+      'L3MON4D3/LuaSnip',
+      'saadparwaiz1/cmp_luasnip',
+      'hrsh7th/cmp-nvim-lsp',
+      'hrsh7th/cmp-path',
+      'hrsh7th/cmp-buffer',
+      'hrsh7th/cmp-emoji',
+      'hrsh7th/cmp-nvim-lsp-signature-help',
+      'hrsh7th/cmp-nvim-lua',
+    },
+    config = function()
+      require 'plugins.configs.cmp'
+    end,
+  },
 
-    use {
-        'tpope/vim-fugitive',
-        config = function()
-            require 'plugins.configs.fugitive'
-        end
-    }
+  -- Completion icons
+  {
+    'onsails/lspkind-nvim',
+    lazy = false,
+    config = function()
+      require 'plugins.configs.lspkind'
+    end,
+  },
 
-    -- Комментарии
-    use {
-        'b3nj5m1n/kommentary',
-        config = function()
-            require 'plugins.configs.kommentary'
-        end,
-    }
+  -- Navigation
+  {
+    'nvim-neo-tree/neo-tree.nvim',
+    branch = 'v2.x',
+    cmd = 'Neotree',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-tree/nvim-web-devicons',
+      'MunifTanjim/nui.nvim',
+    },
+    config = function()
+      require 'plugins.configs.neo-tree'
+    end,
+  },
 
-    -- Плагин для автодополнения скобок и кавычек
-    use {
-        'windwp/nvim-autopairs',
-        config = function()
-            require 'plugins.configs.autopairs'
-        end
-    }
+  -- Documentation
+  {
+    'danymat/neogen',
+    cmd = 'Neogen',
+    dependencies = { 'nvim-treesitter/nvim-treesitter' },
+    config = function()
+      require 'plugins.configs.neogen'
+    end,
+  },
 
-    -- Telescope
-    use {
-        'nvim-telescope/telescope.nvim',
-        requires = { { 'nvim-lua/plenary.nvim' } },
-        config = function() require 'plugins.configs.telescope' end
-    }
+  -- Git
+  {
+    'lewis6991/gitsigns.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
+    config = function()
+      require 'plugins.configs.gitsigns'
+    end,
+  },
 
-    use 'nvim-telescope/telescope-ui-select.nvim'
+  {
+    'tpope/vim-fugitive',
+    cmd = { 'Git', 'G', 'Gdiffsplit', 'Gvdiffsplit', 'Gwrite', 'Gsplit', 'Gvsplit', 'GcLog' },
+    config = function()
+      require 'plugins.configs.fugitive'
+    end,
+  },
 
-    -- Codex
-    use {
-        'rhart92/codex.nvim',
-        config = function()
-            require 'plugins.configs.codex'
-        end
-    }
+  -- Comments
+  {
+    'b3nj5m1n/kommentary',
+    event = 'BufReadPost',
+    config = function()
+      require 'plugins.configs.kommentary'
+    end,
+  },
 
-    -- Java
-    use {
-        'mfussenegger/nvim-jdtls',
-        ft = { 'java' },
-    }
+  -- Auto close brackets and quotes
+  {
+    'windwp/nvim-autopairs',
+    event = 'InsertEnter',
+    config = function()
+      require 'plugins.configs.autopairs'
+    end,
+  },
 
-    -- StartScreen
-    use {
-        'mhinz/vim-startify',
-        config = function()
-            require 'plugins.configs.startify'
-        end
-    }
+  -- Telescope
+  {
+    'nvim-telescope/telescope.nvim',
+    cmd = 'Telescope',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'nvim-telescope/telescope-ui-select.nvim',
+    },
+    config = function() require 'plugins.configs.telescope' end,
+  },
 
-    -- usefull hotkeys
-    use 'tpope/vim-unimpaired'
+  -- Codex
+  {
+    'rhart92/codex.nvim',
+    config = function()
+      require 'plugins.configs.codex'
+    end,
+  },
 
-    -- Оборачивание текста в теги или скобки
-    use 'tpope/vim-surround'
+  -- Java
+  {
+    'mfussenegger/nvim-jdtls',
+    ft = { 'java' },
+  },
 
-    -- Вывод ошибок
-    use {
-        "folke/trouble.nvim",
-        requires = "nvim-tree/nvim-web-devicons",
-        config = function()
-            require 'plugins.configs.trouble'
-        end
-    }
+  -- StartScreen
+  {
+    'mhinz/vim-startify',
+    lazy = false,
+    config = function()
+      require 'plugins.configs.startify'
+    end,
+  },
 
-    -- Database
-    use 'nanotee/sqls.nvim'
-    use {
-        'tpope/vim-dadbod',
-        config = function()
-            require 'plugins.configs.dadbod'
-        end
-    }
-    use { 'kristijanhusak/vim-dadbod-ui' }
-end)
+  -- Useful hotkeys
+  { 'tpope/vim-unimpaired', lazy = false },
+
+  -- Text objects around tags/brackets
+  { 'tpope/vim-surround', lazy = false },
+
+  -- Diagnostics
+  {
+    'folke/trouble.nvim',
+    cmd = 'Trouble',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    keys = {
+      { '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', desc = 'Diagnostics' },
+      { '<leader>xX', '<cmd>Trouble diagnostics_buffer toggle<cr>', desc = 'Buffer diagnostics' },
+      { '<leader>xs', '<cmd>Trouble symbols toggle pinned=true<cr>', desc = 'Document symbols' },
+      { '<leader>xl', '<cmd>Trouble lsp toggle<cr>', desc = 'LSP list' },
+      { '<leader>xq', '<cmd>Trouble qflist toggle<cr>', desc = 'Quickfix list' },
+      { '<leader>xL', '<cmd>Trouble loclist toggle<cr>', desc = 'Location list' },
+    },
+    config = function()
+      require 'plugins.configs.trouble'
+    end,
+  },
+
+  -- Database
+  {
+    'nanotee/sqls.nvim',
+    ft = { 'sql', 'mysql', 'plsql' },
+  },
+  {
+    'tpope/vim-dadbod',
+    cmd = { 'DB', 'DBUI', 'DBUIToggle', 'DBUIFindBuffer', 'DBUIRenameBuffer', 'DBUILastQueryInfo' },
+    config = function()
+      require 'plugins.configs.dadbod'
+    end,
+  },
+  {
+    'kristijanhusak/vim-dadbod-ui',
+    cmd = { 'DBUI', 'DBUIToggle', 'DBUIFindBuffer', 'DBUIRenameBuffer', 'DBUILastQueryInfo' },
+    dependencies = { 'tpope/vim-dadbod' },
+  },
+}, {
+  checker = { enabled = false },
+  change_detection = { notify = false },
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        'gzip',
+        'netrwPlugin',
+        'tarPlugin',
+        'tohtml',
+        'tutor',
+        'zipPlugin',
+      },
+    },
+  },
+})
