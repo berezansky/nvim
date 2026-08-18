@@ -19,8 +19,41 @@ vim.opt.rtp:prepend(lazypath)
 
 require('lazy').setup({
   -- Color schemes
-  { 'shaunsingh/solarized.nvim', lazy = false, priority = 1000 },
-  { 'folke/tokyonight.nvim', lazy = true },
+  {
+    'folke/tokyonight.nvim',
+    lazy = false,
+    priority = 1000,
+  },
+  {
+    'catppuccin/nvim',
+    name = 'catppuccin',
+    lazy = false,
+    priority = 999,
+    opts = {
+      flavour = 'latte',
+      background = {
+        light = 'latte',
+        dark = 'mocha',
+      },
+      term_colors = true,
+      styles = {
+        comments = { 'italic' },
+        conditionals = {},
+        loops = {},
+        functions = {},
+        keywords = {},
+        strings = {},
+        variables = {},
+        numbers = {},
+        booleans = {},
+        properties = {},
+        types = {},
+        operators = {},
+      },
+      default_integrations = true,
+      auto_integrations = true,
+    },
+  },
 
   -- Icons
   { 'nvim-tree/nvim-web-devicons', lazy = true },
@@ -105,15 +138,6 @@ require('lazy').setup({
     cmd = { 'ColorizerAttachToBuffer', 'ColorizerDetachFromBuffer', 'ColorizerReloadAllBuffers', 'ColorizerToggle' },
     config = function()
       require 'plugins.configs.colorizer'
-    end,
-  },
-
-  -- Symbols outline
-  {
-    'simrat39/symbols-outline.nvim',
-    cmd = { 'SymbolsOutline', 'SymbolsOutlineOpen', 'SymbolsOutlineClose' },
-    config = function()
-      require 'plugins.configs.symbols-outline'
     end,
   },
 
@@ -230,12 +254,16 @@ require('lazy').setup({
     ft = { 'java' },
   },
 
-  -- StartScreen
+  -- Start screen and small startup helpers
   {
-    'mhinz/vim-startify',
+    'folke/snacks.nvim',
     lazy = false,
-    config = function()
-      require 'plugins.configs.startify'
+    priority = 1000,
+    opts = function()
+      return require('plugins.configs.snacks')
+    end,
+    config = function(_, opts)
+      require('snacks').setup(opts)
     end,
   },
 

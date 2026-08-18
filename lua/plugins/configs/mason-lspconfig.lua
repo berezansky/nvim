@@ -66,7 +66,7 @@ vim.lsp.config.eslint = {
     settings = {
         format = false,
         quiet = true,
-        run = "onSave",
+        run = "onType",
         provideLintTask = false,
         codeActionOnSave = {
             enable = false,
@@ -85,7 +85,7 @@ vim.lsp.config.eslint = {
             "--max-old-space-size=4096",
         },
         workingDirectory = {
-            mode = "location",
+            mode = "auto",
         },
     },
 }

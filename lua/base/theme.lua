@@ -30,14 +30,13 @@ function M.system_is_dark()
   return vim.v.shell_error == 0 and result:match('Dark') ~= nil
 end
 
-function M.solarized_light()
+function M.light_theme()
   vim.opt.background = 'light'
-  vim.g.solarized_contrast = true
-  vim.g.solarized_borders = false
-  vim.g.solarized_disable_background = false
-  vim.cmd.colorscheme('solarized')
+  vim.cmd.colorscheme('catppuccin-latte')
   refresh_lualine()
 end
+
+M.solarized_light = M.light_theme
 
 function M.tokyonight_dark()
   vim.opt.background = 'dark'
@@ -52,7 +51,7 @@ function M.apply_system_theme()
   if system_dark then
     M.tokyonight_dark()
   else
-    M.solarized_light()
+    M.light_theme()
   end
 end
 
@@ -65,7 +64,7 @@ function M.sync_if_system_changed()
     if system_dark then
       M.tokyonight_dark()
     else
-      M.solarized_light()
+      M.light_theme()
     end
   end
 end
