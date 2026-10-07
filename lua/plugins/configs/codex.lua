@@ -11,7 +11,7 @@ local codex_config = {
     codex_cmd = {
         '/bin/zsh',
         '-lc',
-        'CODEX_HOME="$HOME/.codex-personal" exec "$HOME/.local/bin/codex"',
+        [[CODEX_HOME="$HOME/.codex-personal" exec "$HOME/.local/bin/codex" -c tui.notifications=true -c 'tui.notification_method="osc9"' -c 'tui.notification_condition="always"']],
     },
     focus_after_send = true,
 }
@@ -21,6 +21,46 @@ vim.g.codex_config = codex_config
 local codex = require('codex')
 
 codex.setup(codex_config)
+
+vim.api.nvim_create_autocmd('FileType', {
+    group = vim.api.nvim_create_augroup('CodexEscape', { clear = true }),
+    pattern = 'codex',
+    callback = function(event)
+        vim.keymap.set('t', 'jj', '<C-\\><C-n>', {
+            buffer = event.buf,
+            noremap = true,
+            silent = true,
+            desc = 'Codex: Exit terminal mode',
+        })
+
+        vim.keymap.set('t', '<Esc>', '<Esc>', {
+            buffer = event.buf,
+            noremap = true,
+            silent = true,
+            desc = 'Codex: Escape',
+        })
+    end,
+})
+
+vim.api.nvim_create_autocmd('TermRequest', {
+    group = vim.api.nvim_create_augroup('CodexNotifications', { clear = true }),
+    callback = function(event)
+        if not vim.b[event.buf].codex_terminal then
+            return
+        end
+
+        local message = event.data.sequence:match('^\27%]9;(.+)')
+        if not message then
+            return
+        end
+
+        local level = message:lower():find('action required', 1, true)
+            and vim.log.levels.WARN or vim.log.levels.INFO
+        vim.schedule(function()
+            vim.notify(message, level, { title = 'Codex' })
+        end)
+    end,
+})
 
 local function current_file_label(bufnr)
     local filename = vim.api.nvim_buf_get_name(bufnr)

@@ -27,7 +27,7 @@ nm('<leader>e', '<cmd>lua Snacks.dashboard()<CR>')
 nm('<leader>un', '<cmd>lua Snacks.notifier.show_history()<cr>')
 nm('<leader>.', '<cmd>lua Snacks.scratch()<cr>')
 nm('<leader>S', '<cmd>lua Snacks.scratch.select()<cr>')
-nm('<leader>tt', '<cmd>lua Snacks.terminal.toggle()<cr>')
+nm('<leader>tt', '<cmd>lua Snacks.terminal.toggle(nil, { win = { style = "shell_terminal" } })<cr>')
 
 nm('<leader>Nf', '<cmd>Neogen func<cr>')
 nm('<leader>Nt', '<cmd>Neogen type<cr>')

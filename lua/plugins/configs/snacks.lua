@@ -43,6 +43,35 @@ return {
   },
   scratch = { enabled = true },
   terminal = { enabled = true },
+  styles = {
+    shell_terminal = {
+      position = 'float',
+      width = 0.85,
+      height = 0.85,
+      border = 'rounded',
+      title = 'Terminal',
+      keys = {
+        term_normal = false,
+        terminal_hide = {
+          '<Esc>',
+          function(self)
+            vim.cmd('stopinsert')
+            self:hide()
+          end,
+          mode = { 'n', 't' },
+          desc = 'Hide terminal',
+        },
+        terminal_normal = {
+          'jj',
+          function()
+            vim.cmd('stopinsert')
+          end,
+          mode = 't',
+          desc = 'Exit terminal mode',
+        },
+      },
+    },
+  },
 
   dashboard = {
     enabled = true,

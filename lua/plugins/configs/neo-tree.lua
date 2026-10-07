@@ -10,6 +10,49 @@ nm('<leader>ng', '<cmd>Neotree git_status<cr>')
 nm('<leader>nc', '<cmd>Neotree current reveal float<cr>')
 
 neotree.setup {
+    event_handlers = {
+        {
+            event = 'file_open_requested',
+            handler = function(event)
+                local bufnr = event.bufnr
+                if event.state.name ~= 'buffers' or not bufnr or vim.bo[bufnr].buftype ~= 'terminal' then
+                    return
+                end
+
+                require('neo-tree.sources.manager').close_all('float')
+
+                if vim.b[bufnr].codex_terminal then
+                    require('codex').open()
+                    require('codex.ui').focus()
+                else
+                    local terminal
+                    for _, window in ipairs(Snacks.terminal.list()) do
+                        if window.buf == bufnr then
+                            terminal = window
+                            break
+                        end
+                    end
+
+                    if terminal then
+                        terminal:show():focus()
+                    else
+                        Snacks.win({
+                            buf = bufnr,
+                            width = 0.85,
+                            height = 0.85,
+                            border = 'rounded',
+                            title = vim.b[bufnr].term_title,
+                            enter = true,
+                            keys = { q = 'close', ['<Esc>'] = 'close' },
+                        })
+                    end
+                end
+
+                vim.cmd('startinsert')
+                return { handled = true }
+            end,
+        },
+    },
     popup_border_style = "rounded",
     enable_git_status = true,
     enable_diagnostics = true,
