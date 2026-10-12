@@ -1,5 +1,21 @@
 require 'keys/alias'
 
+vim.api.nvim_create_autocmd('CursorHold', {
+  group = vim.api.nvim_create_augroup('LspHover', { clear = true }),
+  callback = function(event)
+    if #vim.lsp.get_clients({ bufnr = event.buf, method = 'textDocument/hover' }) == 0 then
+      return
+    end
+
+    vim.lsp.buf.hover({
+      silent = true,
+      focus = false,
+      border = 'rounded',
+      close_events = { 'CursorMoved', 'CursorMovedI', 'InsertEnter' },
+    })
+  end,
+})
+
 local previews = {}
 local origin_win
 local request_id = 0

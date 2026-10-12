@@ -22,3 +22,4 @@ opt.undofile = true                  -- Возможность отката на
 opt.splitright = true                -- vertical split вправо
 opt.splitbelow = true                -- horizontal split вниз
 opt.completeopt = 'menuone,noselect' -- Автодополнение (встроенное в Neovim)
+opt.updatetime = 500                -- Задержка перед CursorHold
