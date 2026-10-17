@@ -1,20 +1,16 @@
 require 'keys/alias'
 
-vim.api.nvim_create_autocmd('CursorHold', {
-  group = vim.api.nvim_create_augroup('LspHover', { clear = true }),
-  callback = function(event)
-    if #vim.lsp.get_clients({ bufnr = event.buf, method = 'textDocument/hover' }) == 0 then
-      return
-    end
+vim.keymap.set('n', 'K', function()
+  if #vim.lsp.get_clients({ bufnr = 0, method = 'textDocument/hover' }) == 0 then
+    return
+  end
 
-    vim.lsp.buf.hover({
-      silent = true,
-      focus = false,
-      border = 'rounded',
-      close_events = { 'CursorMoved', 'CursorMovedI', 'InsertEnter' },
-    })
-  end,
-})
+  vim.lsp.buf.hover({
+    silent = true,
+    border = 'rounded',
+    close_events = { 'CursorMoved', 'CursorMovedI', 'InsertEnter' },
+  })
+end, { noremap = true, silent = true, desc = 'Информация о типе' })
 
 local previews = {}
 local origin_win
@@ -88,7 +84,7 @@ local function preview_definition(item)
   previews[#previews + 1] = { win = win, bufnr = bufnr }
 end
 
-vim.keymap.set('n', 'K', function()
+vim.keymap.set('n', '<D-k>', function()
   local win = vim.api.nvim_get_current_win()
   local preview = previews[#previews]
   local bufnr = preview and preview.win.win == win and preview.bufnr or vim.api.nvim_get_current_buf()
